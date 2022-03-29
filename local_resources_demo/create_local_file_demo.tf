@@ -19,6 +19,12 @@ resource "local_file" "foo" {
     filename = "${path.cwd}/temp/foo.txt"
     content = "This is a text content of the foo file!"
 
+    # If we want to prevent 'terraform plan|apply' commands to print out the file content in their
+    # output in terminal, we can use sensitive_content argument (instead of content):
+    # sensitive_content = "This is a text content of the foo file!"
+    # Execution plan in terminal will now contain this line:
+    # + sensitive_content    = (sensitive value)
+
     # Uncomment and execute 'terraform apply' again in order to change resources already deployed
     # file_permission = "0700"
 }
