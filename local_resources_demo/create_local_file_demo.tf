@@ -15,6 +15,7 @@
 # $ terraform show - to see the changes made
 # $ terraform destroy - to destroy created resources
 #
+
 resource "local_file" "foo" {
     filename = "${path.cwd}/temp/foo.txt"
     content = "This is a text content of the foo file!"
