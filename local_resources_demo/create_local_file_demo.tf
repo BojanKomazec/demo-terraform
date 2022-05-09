@@ -17,15 +17,28 @@
 #
 
 resource "local_file" "foo" {
-    filename = "${path.cwd}/temp/foo.txt"
-    content = "This is a text content of the foo file!"
+  # filename = "${path.cwd}/temp/foo.txt"
 
-    # If we want to prevent 'terraform plan|apply' commands to print out the file content in their
-    # output in terminal, we can use sensitive_content argument (instead of content):
-    # sensitive_content = "This is a text content of the foo file!"
-    # Execution plan in terminal will now contain this line:
-    # + sensitive_content    = (sensitive value)
+  # if we're using count meta-argument, we can use it's current value: count.index
+  # filename = "${path.cwd}/temp/foo${count.index}.txt"
 
-    # Uncomment and execute 'terraform apply' again in order to change resources already deployed
-    # file_permission = "0700"
+  # TF can read attribute values from variables file.
+  # var.filename is a tuple with 3 elements and we can access them by using var.filename[i]:
+  filename = "${path.cwd}/temp/${var.filename[count.index]}"
+
+  content = "This is a text content of the foo file!"
+
+  # If we want to prevent 'terraform plan|apply' commands to print out the file content in their
+  # output in terminal, we can use sensitive_content argument (instead of content):
+  # sensitive_content = "This is a text content of the foo file!"
+  # Execution plan in terminal will now contain this line:
+  # + sensitive_content    = (sensitive value)
+
+  # Uncomment and execute 'terraform apply' again in order to change resources already deployed
+  # file_permission = "0700"
+
+  # count = 3
+
+  # Automatically pick up the length of the list:
+  count = length(var.filename)
 }
