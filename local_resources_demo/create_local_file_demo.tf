@@ -42,3 +42,9 @@ resource "local_file" "foo" {
   # Automatically pick up the length of the list:
   count = length(var.filename)
 }
+
+# use 'terraform output foo_files' after 'terraform apply'
+output foo_files {
+  value = local_file.foo
+  sensitive = true
+}
