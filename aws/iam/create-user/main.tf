@@ -3,6 +3,14 @@
 #     access_key = ""
 #     secret_key = ""
 #     region = ""
+#
+#     The following attributes are not needed when working directly with the AWS Cloud.
+#     They are only needed when using an AWS mock framework.
+#     skip_credentials_validation = true
+#     skip_requesting_account_id  = true
+#     endpoints {
+#       iam = "http://aws:4566"
+#     }
 # }
 
 resource "aws_iam_user" "admin_user" {
