@@ -10,3 +10,6 @@
 
 # macOS file
 .DS_Store
+
+# key pairs
+**/keys/*
