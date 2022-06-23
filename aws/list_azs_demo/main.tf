@@ -11,12 +11,12 @@ ${az}
 }
 
 resource "local_file" "az" {
-  # use this if var.filename has type set
-  # for_each = var.filename
+    # use this if var.filename has type set
+    # for_each = var.filename
 
-  # toset() converts list into set. Use it if var.filename is a list.
-  for_each = toset(data.aws_availability_zones.available.names)
+    # toset() converts list into set. Use it if var.filename is a list.
+    for_each = toset(data.aws_availability_zones.available.names)
 
-  filename = "${path.cwd}/temp/${each.value}"
-  content = "This is a text content of the az file!"
+    filename = "${path.cwd}/temp/${each.value}"
+    content = "This is a text content of the az file!"
 }

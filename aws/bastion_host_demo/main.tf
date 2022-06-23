@@ -1,5 +1,6 @@
 resource "aws_vpc" "test-vpc" {
-    cidr_block  = "10.10.0.0/16"
+    cidr_block  = var.vpc_cidr
+
     tags = {
         Name = "test-vpc"
     }
@@ -67,10 +68,21 @@ resource "aws_route_table" "private-rt" {
     }
 }
 
+locals {
+    subnet_cidrs = {
+        for i, az in data.aws_availability_zones.available.names: az => {
+            public = cidrsubnet(var.vpc_cidr, 8, i)
+            private = cidrsubnet(var.vpc_cidr, 8, i + length(data.aws_availability_zones.available.names))
+        }
+    }
+}
+
 resource "aws_subnet" "public-subnet" {
     vpc_id     = aws_vpc.test-vpc.id
-    cidr_block = "10.10.0.0/24"
-    availability_zone = "eu-west-1a"
+
+    for_each = local.subnet_cidrs
+    availability_zone = "${each.key}"
+    cidr_block = "${each.value.public}"
 
     // instances launched into the subnet should be assigned a public IP address
     map_public_ip_on_launch = true
@@ -82,8 +94,10 @@ resource "aws_subnet" "public-subnet" {
 
 resource "aws_subnet" "private-subnet" {
     vpc_id     = aws_vpc.test-vpc.id
-    cidr_block = "10.10.3.0/24"
-    availability_zone = "eu-west-1a"
+
+    for_each = local.subnet_cidrs
+    availability_zone = "${each.key}"
+    cidr_block = "${each.value.private}"
 
     tags = {
         Name = "Private subnet"
@@ -91,23 +105,27 @@ resource "aws_subnet" "private-subnet" {
 }
 
 resource "aws_route_table_association" "public-subnet-rt-association" {
-    subnet_id      = aws_subnet.public-subnet.id
+    for_each = local.subnet_cidrs
+    subnet_id      = aws_subnet.public-subnet[each.key].id
     route_table_id = aws_route_table.public-rt.id
 }
 
 resource "aws_route_table_association" "private-subnet-rt-association" {
-    subnet_id      = aws_subnet.private-subnet.id
+    for_each = local.subnet_cidrs
+    subnet_id      = aws_subnet.private-subnet[each.key].id
     route_table_id = aws_route_table.private-rt.id
 }
 
 resource "aws_instance" "bastion-host-ec2-instance" {
-    availability_zone = "eu-west-1a"
-    instance_type = "t2.micro"
+    for_each = local.subnet_cidrs
+    availability_zone = "${each.key}"
+    instance_type = var.ec2_instance_type
 
     # Amazon Linux 2 (default user: ec2-user)
-    ami = "ami-0c1bc246476a5572b"
+    // ami = "ami-0c1bc246476a5572b"
+    ami = data.aws_ami.amzn2_ami.id
 
-    subnet_id = aws_subnet.public-subnet.id
+    subnet_id = aws_subnet.public-subnet[each.key].id
     associate_public_ip_address = true
 
     tags = {
@@ -115,7 +133,8 @@ resource "aws_instance" "bastion-host-ec2-instance" {
         Name = "Bastion host EC2"
     }
 
-    key_name = aws_key_pair.ec2--demo-app.key_name
+    // key_name = aws_key_pair.ec2--demo-app.key_name
+    key_name = aws_key_pair.ec2-keypair.key_name
 
     vpc_security_group_ids = [ aws_security_group.allow_ssh.id ]
 
@@ -123,35 +142,44 @@ resource "aws_instance" "bastion-host-ec2-instance" {
 }
 
 resource "aws_instance" "private-ec2-instance" {
-    availability_zone = "eu-west-1a"
-    instance_type = "t2.micro"
+    for_each = local.subnet_cidrs
+    availability_zone = "${each.key}"
+    instance_type = var.ec2_instance_type
 
     # Amazon Linux 2 (default user: ec2-user)
-    ami = "ami-0c1bc246476a5572b"
+    ami = data.aws_ami.amzn2_ami.id
 
-    subnet_id = aws_subnet.private-subnet.id
+    subnet_id = aws_subnet.private-subnet[each.key].id
 
     tags = {
         Description = "Private EC2"
         Name = "Private EC2"
     }
 
-    key_name = aws_key_pair.ec2--demo-app.key_name
+    // key_name = aws_key_pair.ec2--demo-app.key_name
+    key_name = aws_key_pair.ec2-keypair.key_name
 
     vpc_security_group_ids = [ aws_security_group.allow_ssh.id ]
 }
 
-resource "aws_key_pair" "ec2--demo-app" {
-    public_key = file("./keys/key-pair--ec2--demo-app.pub")
-    key_name = "key-pair--ec2--demo-app"
+# Use this in production
+# resource "aws_key_pair" "ec2--demo-app" {
+#     public_key = file("./keys/key-pair--ec2--demo-app.pub")
+#     key_name = "key-pair--ec2--demo-app"
+# }
+
+resource "tls_private_key" "rsa-4096-private-key" {
+    algorithm = "RSA"
+    rsa_bits  = 4096
 }
 
-// capture Bastion Host public IP so we can SSH to it from dev box
-output bastion_host_ec2_ip {
-    value = aws_instance.bastion-host-ec2-instance.public_ip
+resource "aws_key_pair" "ec2-keypair" {
+    key_name   = "ec2-keypair"
+    public_key = tls_private_key.rsa-4096-private-key.public_key_openssh
 }
 
-// capture Private Ec2 Host private IP so we can SSH to it from bastion host
-output private_ec2_ip {
-    value = aws_instance.private-ec2-instance.private_ip
+resource "local_file" "ec2-key" {
+    content  = tls_private_key.rsa-4096-private-key.private_key_pem
+    filename = "${path.module}/temp/ec2-key"
 }
+
