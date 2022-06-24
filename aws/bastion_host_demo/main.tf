@@ -43,6 +43,33 @@ resource "aws_security_group" "allow_ssh" {
     }
 }
 
+resource "aws_security_group" "allow_outbound_https" {
+    name        = "allow_outbound_https"
+    description = "Allow outbound HTTPS traffic"
+    vpc_id      = aws_vpc.test-vpc.id
+
+    ingress {
+        description      = 0
+        from_port        = 0
+        to_port          = 0
+        protocol         = "-1"
+        cidr_blocks      = []
+        ipv6_cidr_blocks = []
+    }
+
+    egress {
+        from_port        = 443
+        to_port          = 0
+        protocol         = "TCP"
+        cidr_blocks      = ["0.0.0.0/0"]
+        ipv6_cidr_blocks = []
+    }
+
+    tags = {
+        Name = "allow_outbound_https"
+    }
+}
+
 // depends on: VPC (ID), Internet Gateway
 // default route, mapping the VPC's CIDR block to "local", is created implicitly and cannot be specified.
 resource "aws_route_table" "public-rt" {
@@ -78,7 +105,7 @@ locals {
 }
 
 resource "aws_subnet" "public-subnet" {
-    vpc_id     = aws_vpc.test-vpc.id
+    vpc_id = aws_vpc.test-vpc.id
 
     for_each = local.subnet_cidrs
     availability_zone = "${each.key}"
@@ -93,7 +120,7 @@ resource "aws_subnet" "public-subnet" {
 }
 
 resource "aws_subnet" "private-subnet" {
-    vpc_id     = aws_vpc.test-vpc.id
+    vpc_id = aws_vpc.test-vpc.id
 
     for_each = local.subnet_cidrs
     availability_zone = "${each.key}"
@@ -139,6 +166,8 @@ resource "aws_instance" "bastion-host-ec2-instance" {
     vpc_security_group_ids = [ aws_security_group.allow_ssh.id ]
 
     depends_on = [aws_internet_gateway.int-gw]
+
+    user_data = "${file("bootstrap.sh")}"
 }
 
 resource "aws_instance" "private-ec2-instance" {
@@ -159,7 +188,12 @@ resource "aws_instance" "private-ec2-instance" {
     // key_name = aws_key_pair.ec2--demo-app.key_name
     key_name = aws_key_pair.ec2-keypair.key_name
 
-    vpc_security_group_ids = [ aws_security_group.allow_ssh.id ]
+    vpc_security_group_ids = [
+        aws_security_group.allow_ssh.id,
+        aws_security_group.allow_outbound_https.id
+    ]
+
+    user_data = "${file("bootstrap.sh")}"
 }
 
 # Use this in production
@@ -181,5 +215,25 @@ resource "aws_key_pair" "ec2-keypair" {
 resource "local_file" "ec2-key" {
     content  = tls_private_key.rsa-4096-private-key.private_key_pem
     filename = "${path.module}/temp/ec2-key"
+    file_permission = "400"
+
+    provisioner "local-exec" {
+        command = "ssh-add ${self.filename}"
+        on_failure = continue
+    }
+}
+
+// Public key is saved locally so private key identity can be removed
+// (ssh-add -d <path_to_pub>) from SSH agent once Key pair resource is
+// destroyed.
+resource "local_file" "ec2-key-pub" {
+    content  =tls_private_key.rsa-4096-private-key.public_key_openssh
+    filename = "${path.module}/temp/ec2-key.pub"
+
+    provisioner "local-exec" {
+        command = "ssh-add -d ${self.filename}"
+        when = destroy
+        on_failure = continue
+    }
 }
 
