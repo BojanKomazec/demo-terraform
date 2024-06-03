@@ -14,10 +14,10 @@
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role
 resource "aws_iam_role" "eks-cluster-role" {
   # (Optional) Friendly name of the role. If omitted, Terraform will assign a random, unique name.
-  name = "eksClusterRole"
+  name = var.cluster_role_name
 
   # (Optional)
-  description = "Amazon EKS - Cluster role"
+  description = var.cluster_role_description
 
   # (required) Policy that grants an entity permission to assume the role.
   # assume_role_policy is very similar to but slightly different than a standard IAM
@@ -62,18 +62,9 @@ data "aws_subnets" "default" {
   }
 }
 
-# 'terraform plan' prints output vars
-output "default_vpc" {
-  value = data.aws_vpc.default
-}
-
-output "default_subnets" {
-  value = data.aws_subnets.default
-}
-
-resource "aws_eks_cluster" "example-voting-app" {
+resource "aws_eks_cluster" "this" {
   # (required)  Name of the cluster.
-  name = "example-voting-app"
+  name = var.cluster_name
 
   # Desired Kubernetes master version. If you do not specify a value,
   # the latest available version at resource creation is used and no
@@ -104,9 +95,9 @@ resource "aws_eks_cluster" "example-voting-app" {
 
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_node_group#example-iam-role-for-eks-node-group
 resource "aws_iam_role" "eks_node_role" {
-  name = "eksNodeRole"
+  name = var.node_role_name
 
-  description = "IAM Role for EKS Node Group"
+  description = var.node_role_description
 
   assume_role_policy = jsonencode({
     Statement = [{
@@ -135,12 +126,12 @@ resource "aws_iam_role_policy_attachment" "eks_node_role-AmazonEC2ContainerRegis
   role       = aws_iam_role.eks_node_role.name
 }
 
-resource "aws_eks_node_group" "demo_workers" {
+resource "aws_eks_node_group" "workers" {
     # (Optional) Name of the EKS Node Group.
-    node_group_name = "demo-workers"
+    node_group_name = var.node_group_name
 
     # (Required) Name of the EKS Cluster.
-    cluster_name = aws_eks_cluster.example-voting-app.name
+    cluster_name = aws_eks_cluster.this.name
 
     # (Required) Amazon Resource Name (ARN) of the IAM Role that provides permissions for the EKS Node Group.
     node_role_arn = aws_iam_role.eks_node_role.arn
@@ -149,12 +140,13 @@ resource "aws_eks_node_group" "demo_workers" {
     # Auto-scaling.
     scaling_config {
         # (Required) Desired number of worker nodes.
-        desired_size = 2
+        desired_size = var.node_group_desired_size
+
         # (Required) Maximum number of worker nodes.
-        max_size = 2
+        max_size = var.node_group_max_size
 
         # (Required) Minimum number of worker nodes.
-        min_size = 2
+        min_size = var.node_group_min_size
     }
 
     # (Required) Identifiers of EC2 Subnets to associate with the EKS Node Group.
@@ -167,14 +159,14 @@ resource "aws_eks_node_group" "demo_workers" {
 
     # (Optional) Type of Amazon Machine Image (AMI) associated with the EKS Node Group.
     # https://docs.aws.amazon.com/eks/latest/APIReference/API_Nodegroup.html#AmazonEKS-Type-Nodegroup-amiType
-    ami_type = "AL2_x86_64"
+    ami_type = var.node_ami_type
 
     # (Optional) List of instance types associated with the EKS Node Group. Defaults to ["t3.medium"].
     # "t2.micro" is available in free tier BUT
     # https://stackoverflow.com/questions/75026935/pod-creation-in-eks-cluster-fails-with-failedscheduling-error
     # https://github.com/awslabs/amazon-eks-ami/blob/pinned-cache/files/eni-max-pods.txt
-    instance_types = ["t2.medium"]
+    instance_types = var.node_instance_types
 
     # (Optional) Disk size in GiB for worker nodes. Defaults to 50 for Windows, 20 all other node groups.
-    disk_size = 20
+    disk_size = var.node_disk_size
 }
