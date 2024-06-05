@@ -170,3 +170,23 @@ resource "aws_eks_node_group" "workers" {
     # (Optional) Disk size in GiB for worker nodes. Defaults to 50 for Windows, 20 all other node groups.
     disk_size = var.node_disk_size
 }
+
+# NOTE: I only had success adding and activating this add-on via resource "aws_guardduty_detector_feature".
+# resource "aws_eks_addon" "guardduty" {
+#   # (Required) Name of the EKS Cluster.
+#   cluster_name                = aws_eks_cluster.this.name
+
+#   # (Required) Name of the EKS add-on.
+#   # To get all available addons execute:
+#   # $ aws eks describe-addon-versions --output table --query 'addons[].{Name: addonName, Publisher: publisher}'
+#   addon_name                  = "aws-guardduty-agent"
+
+#   # (Optional) The version of the EKS add-on. The version must match one of the versions returned by describe-addon-versions.
+#   # To get the latest version execute:
+#   # $ aws eks describe-addon-versions --output table --addon-name=aws-guardduty-agent --query 'addons[].{Name: addonName, Publisher: publisher, Version: addonVersions[0].addonVersion}'
+#   addon_version               = "v1.6.1-eksbuild.1"
+
+#   # (Optional) How to resolve field value conflicts for an Amazon EKS add-on if you've changed a value from the Amazon EKS default value.
+#   # Valid values are NONE, OVERWRITE, and PRESERVE.
+#   resolve_conflicts_on_update = "OVERWRITE"
+# }
