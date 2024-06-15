@@ -1,1 +1,0 @@
-This is a text content of the foo file!

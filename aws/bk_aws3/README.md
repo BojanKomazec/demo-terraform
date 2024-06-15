@@ -1,4 +1,4 @@
 # ToDo
 
-- use services to provision base AWS services like custom VPC, private subnets etc...
+- Add provisioning IAM users and groups in services
 - introduce environments for project/voting-app (including workspaces)
