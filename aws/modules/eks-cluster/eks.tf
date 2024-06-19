@@ -34,6 +34,24 @@ resource "aws_eks_cluster" "this" {
     public_access_cidrs = ["0.0.0.0/0"]
   }
 
+  # (Optional) Configuration block for the access config associated with the
+  # cluster.
+  access_config {
+    # (Optional) The authentication mode for the cluster. Valid values are
+    # CONFIG_MAP, API or API_AND_CONFIG_MAP.
+    # If you create a cluster by using the EKS API, AWS SDKs, or
+    # AWS CloudFormation, the default is CONFIG_MAP. If you create the cluster
+    # by using the AWS Management Console, the default value is
+    # API_AND_CONFIG_MAP
+    authentication_mode                         = "CONFIG_MAP"
+
+    # (Optional) Whether or not to bootstrap the access config values to the
+    # cluster. Default is true.
+    # Specifies whether or not the cluster creator IAM principal was set as a
+    # cluster admin access entry during cluster creation time.
+    bootstrap_cluster_creator_admin_permissions = true
+  }
+
   # Ensure that IAM Role permissions are created before and deleted after EKS
   # Cluster handling. Otherwise, EKS will not be able to properly delete EKS
   # managed EC2 infrastructure such as Security Groups.

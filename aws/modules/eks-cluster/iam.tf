@@ -41,7 +41,7 @@ resource "aws_iam_role" "eks-cluster-role" {
   #
   #   Type     Reason                  Age                 From                Message
   #   ----     ------                  ----                ----                -------
-  #   Warning  SyncLoadBalancerFailed  4m5s                service-controller  Error syncing load balancer: failed to ensure load balancer: error describing subnets: "error listing AWS subnets: \"UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::471112786618:assumed-role/eksClusterRole/1716938688010985053 is not authorized to perform: ec2:DescribeSubnets because no identity-based policy allows the ec2:DescribeSubnets action\\n\\tstatus code: 403, request id: 8a39066d-2f88-4d2f-b45b-de41045edda9\""
+  #   Warning  SyncLoadBalancerFailed  4m5s                service-controller  Error syncing load balancer: failed to ensure load balancer: error describing subnets: "error listing AWS subnets: \"UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::47xxxx18:assumed-role/eksClusterRole/171xxxxx053 is not authorized to perform: ec2:DescribeSubnets because no identity-based policy allows the ec2:DescribeSubnets action\\n\\tstatus code: 403, request id: 8a39066d-2f88-4d2f-b45b-de41045edda9\""
   #
   # To prevent that the best is to use AWS managed AmazonEKSServicePolicy as recommended in the
   # document above and also here:

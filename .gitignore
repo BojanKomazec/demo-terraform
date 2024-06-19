@@ -6,11 +6,18 @@
 *.tfstate
 *.tfstate.*
 
+# Temporary directories
 */temp*
 **/temp/*
+
+*/tmp*
+**/tmp/*
 
 # macOS file
 .DS_Store
 
 # key pairs
 **/keys/*
+
+# Files temporary used for tests
+*.removeme

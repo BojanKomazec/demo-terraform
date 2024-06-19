@@ -21,7 +21,7 @@ variable "subnets" {
       Environment = string
       Owner       = string
     })
-    optional_tags = map(string)
+    optional_tags = optional(map(string))
   }))
 }
 
