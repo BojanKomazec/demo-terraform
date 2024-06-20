@@ -9,3 +9,15 @@ output "status_code" {
 output "file_names" {
 	value = local.file_names
 }
+
+output "yaml_template_file_content" {
+	value = local.yaml_template_file_content
+}
+
+output "person_name" {
+	value = local.person_name
+}
+
+output "person_name_2" {
+	value = local.person_name_2
+}

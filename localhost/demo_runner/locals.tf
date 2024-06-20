@@ -14,4 +14,22 @@ locals {
 	regex_expr = "/([^/]*)$"
 
   file_names = [for url in local.urls : regex(local.regex_expr, url)]
+
+	person = {
+		Name = "Bojan"
+		Surname = "Komazec"
+	}
+
+	# To access map's values we can use key with . or [] notation:
+	person_name = local.person.Name
+	person_name_2 = local.person["Name"]
+
+	test_user_name = "test_user"
+	test_user_roles = [ "ContentReader", "CommentReader", "CommentWriter" ]
+
+	yaml_template_file_content = templatefile("${path.module}/files/templates/test.yaml.tftpl", {
+		user_name = local.test_user_name
+		roles = local.test_user_roles
+		version = "1.0.0"
+	})
 }

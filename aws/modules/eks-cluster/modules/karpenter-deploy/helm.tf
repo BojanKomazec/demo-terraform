@@ -4,7 +4,7 @@
 # Error: Kubernetes cluster unreachable: Get "https://FBA1D3570D004D2B1CEADC1145B2E928.yl4.eu-west-2.eks.amazonaws.com/version": dial tcp: lookup FBA1D3570D004D2B1CEADC1145B2E928.yl4.eu-west-2.eks.amazonaws.com on 127.0.0.53:53: no such host
 #
 resource "helm_release" "karpenter" {
-  namespace        = "kube-system"
+  namespace        = var.karpenter_namespace
   create_namespace = true
   name             = "karpenter"
   repository       = "oci://public.ecr.aws/karpenter"
@@ -58,5 +58,29 @@ resource "helm_release" "karpenter" {
     EOF
   ]
 
-  depends_on = [ resource.kubernetes_manifest.karpenter_crd ]
+  # depends_on = [ resource.kubernetes_manifest.karpenter_crd ]
+  depends_on = [ resource.helm_release.karpenter_crd ]
+}
+
+# https://gallery.ecr.aws/karpenter/karpenter-crd
+resource "helm_release" "karpenter_crd" {
+
+  # (Required) Chart name to be installed. A path may be used.
+  chart = "karpenter-crd"
+
+  # (Required) Release name
+  name = "karpenter-crd"
+
+  # Namespace to install the release into.
+  namespace = var.karpenter_namespace
+
+  # Create the namespace if it does not exist.
+  create_namespace = true
+
+  # Repository where to locate the requested chart.
+  repository = "oci://public.ecr.aws/karpenter"
+
+  # Specify the exact chart version to install. If this is not specified, the
+  # latest version is installed.
+  version = var.karpenter_version
 }

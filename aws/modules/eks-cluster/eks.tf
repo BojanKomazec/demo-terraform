@@ -43,12 +43,17 @@ resource "aws_eks_cluster" "this" {
     # AWS CloudFormation, the default is CONFIG_MAP. If you create the cluster
     # by using the AWS Management Console, the default value is
     # API_AND_CONFIG_MAP
-    authentication_mode                         = "CONFIG_MAP"
+    authentication_mode                         = "API_AND_CONFIG_MAP"
 
     # (Optional) Whether or not to bootstrap the access config values to the
     # cluster. Default is true.
     # Specifies whether or not the cluster creator IAM principal was set as a
     # cluster admin access entry during cluster creation time.
+    # If this is set to false (or config map gets overwritten later so this
+    # prinicpal is removed) the following error is shown in AWS Console when
+    # principal tries to view cluster resources:
+    # "Your current user or role does not have access to Kubernetes objects on
+    # this EKS cluster"
     bootstrap_cluster_creator_admin_permissions = true
   }
 

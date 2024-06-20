@@ -1,5 +1,5 @@
-module "nginx-virtual-network" {
-  source = "../../modules/virtual-network"
+module "nginx-vpc" {
+  source = "../../modules/vpc"
 
   vpc = {
     cidr_block = "10.0.0.0/16"
@@ -103,7 +103,7 @@ module "nginx-eks-cluster" {
     name = local.cluster_name
 
     # Nice example of https://developer.hashicorp.com/terraform/language/modules/develop/composition
-    vpc_subnet_ids = module.nginx-virtual-network.subnet_ids
+    vpc_subnet_ids = module.nginx-vpc.subnet_ids
   }
 
   node_group = {
@@ -120,11 +120,11 @@ module "nginx-eks-cluster" {
     node_ami_type       = "AL2_x86_64"
     node_instance_types = ["t2.medium"]
     node_disk_size      = 20
-    subnet_ids          = module.nginx-virtual-network.private_subnet_ids
+    subnet_ids          = module.nginx-vpc.private_subnet_ids
   }
 
   cluster_role = {
-    name        = "eksClusterRole"
+    name        = "eksClusterRole-${local.cluster_name}"
     description = "Amazon EKS - Cluster role"
   }
 
@@ -134,16 +134,29 @@ module "nginx-eks-cluster" {
   }
 }
 
-module "nginx-eks-karpenter" {
-  source = "../../modules/eks-cluster/modules/karpenter"
+module "nginx-eks-karpenter-deploy" {
+  source = "../../modules/eks-cluster/modules/karpenter-deploy"
 
   aws_region                       = local.aws_region
   aws_environment                  = local.aws_environment
+  aws_iam_profile                  = "terraform"
   cluster_name                     = local.cluster_name
   karpenter_version                = "0.37.0"
-  node_group_name = local.node_group_name
-  node_groups_subnet_ids           = module.nginx-virtual-network.private_subnet_ids
+  karpenter_namespace              = "kube-system"
+  node_group_name                  = local.node_group_name
+  node_groups_subnet_ids           = module.nginx-vpc.private_subnet_ids
   eks_cluster_node_group_role_name = module.nginx-eks-cluster.node_group_role_name
+
+  depends_on = [module.nginx-eks-cluster]
+}
+
+module "nginx-eks-karpenter-post-deploy" {
+  # Provisioning Karpenter for the first time is a two-step process.
+  # For the first 'terraform apply', omit provisioning this module.
+  # Then execute 'terraform apply' again with this module included.
+  count = 1
+  source = "../../modules/eks-cluster/modules/karpenter-post-deploy"
+  karpenter_node_role_name = module.nginx-eks-karpenter-deploy.karpenter_node_role_name
 
   node_pool_instance = {
     arch   = ["amd64"]
@@ -152,5 +165,10 @@ module "nginx-eks-karpenter" {
     size   = ["medium"]
   }
 
-  depends_on = [ module.nginx-eks-cluster ]
+  node_group_name                  = local.node_group_name
+  cluster_name                     = local.cluster_name
 }
+
+# output "karpenter_node_pool_yaml_content" {
+#   value = module.nginx-eks-karpenter-post-deploy[0].karpenter_node_pool_yaml_content
+# }

@@ -60,12 +60,8 @@ variable "karpenter_version" {
   type = string
 }
 
-variable "node_pool_instance" {
-  type = object({
-    arch   = list(string) # "amd64"
-    os     = list(string) # "linux"
-    family = list(string) # "t3a"
-    size   = list(string) # "xlarge"
-  })
+variable "karpenter_namespace" {
+  description = "EKS cluster namespace into which to install Karpenter"
+  type = string
 }
 

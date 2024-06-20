@@ -26,7 +26,7 @@ module "download_yaml_files" {
 }
 
 module "meta_args_demo" {
-	count = 1
+	count = 0
 	source = "./modules/meta_args_demo"
 	# tmp_dir_path = "${path.cwd}"
 	dest_dir_path = "${path.module}/tmp/"

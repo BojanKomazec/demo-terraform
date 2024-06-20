@@ -13,6 +13,13 @@ provider "aws" {
 
   # London
   region = local.aws_region
+
+  # This is necessary so that tags required for Karpenter can be applied to the vpc
+  # without changes to the vpc wiping them out.
+  # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/resource-tagging#ignoring-changes-in-individual-resources
+  ignore_tags {
+    key_prefixes = ["karpenter.sh/"]
+  }
 }
 
 # Initiate helm provider
@@ -47,7 +54,7 @@ provider "helm" {
     host = module.nginx-eks-cluster.endpoint
 
     # (Optional) PEM-encoded root certificates bundle for TLS authentication.
-    # cluster_ca_certificate = base64decode(aws_eks_cluster.this.certificate_authority[0].data)
+    cluster_ca_certificate = base64decode(module.nginx-eks-cluster.kubeconfig-certificate-authority-data)
 
     # (Optional) Configuration block to use an exec-based credential plugin,
     # e.g. call an external command to receive user credentials.
@@ -57,10 +64,10 @@ provider "helm" {
       api_version = "client.authentication.k8s.io/v1beta1"
 
       # (Optional) List of arguments to pass when executing the plugin.
-      args        = local.eks_auth_args
+      args = local.eks_auth_args
 
       # (Required) Command to execute.
-      command     = "aws"
+      command = "aws"
     }
   }
 

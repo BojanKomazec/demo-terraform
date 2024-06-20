@@ -44,7 +44,7 @@ resource "aws_iam_role" "karpenter-controller" {
   assume_role_policy = templatefile("${path.module}/files/templates/KarpenterControllerRoleTrustPolicy.json.tftpl", {
     AWS_ACCOUNT_ID      = local.account_id,
     OIDC_ENDPOINT       = replace(local.eks_cluster_oidc_issuer_url, "https://", ""),
-    KARPENTER_NAMESPACE = "kube-system",
+    KARPENTER_NAMESPACE = var.karpenter_namespace,
   })
 }
 

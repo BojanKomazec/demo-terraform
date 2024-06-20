@@ -15,10 +15,10 @@
 # ToDo: rename resource to "eks-cluster" as 'role' is redundant in the name.
 resource "aws_iam_role" "eks-cluster-role" {
   # (Optional) Friendly name of the role. If omitted, Terraform will assign a random, unique name.
-  name = var.cluster_role["name"]
+  name = var.cluster_role.name
 
   # (Optional)
-  description = var.cluster_role["description"]
+  description = var.cluster_role.description
 
   # (required) Policy that grants an entity permission to assume the role.
   # assume_role_policy is very similar to but slightly different than a standard IAM
