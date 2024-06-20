@@ -79,3 +79,16 @@ resource "aws_iam_instance_profile" "karpenter" {
   name = "KarpenterNodeInstanceProfile"
   role = var.eks_cluster_node_group_role_name
 }
+
+# Service linked role required in order to avoid error (that happens when
+# Karpenter wants to create a new instance and can be seen in Karpenter log)
+# AuthFailure.ServiceLinkedRoleCreationNotPermitted: The provided credentials
+# do not have permission to create the service-linked role for EC2 Spot
+# Instances
+# See: https://karpenter.sh/docs/troubleshooting/#missing-service-linked-role
+resource "aws_iam_service_linked_role" "elasticbeanstalk" {
+  aws_service_name = "spot.amazonaws.com"
+  tags = {
+    Origin = "karpenter-deploy"
+  }
+}

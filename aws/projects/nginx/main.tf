@@ -154,7 +154,7 @@ module "nginx-eks-karpenter-post-deploy" {
   # Provisioning Karpenter for the first time is a two-step process.
   # For the first 'terraform apply', omit provisioning this module.
   # Then execute 'terraform apply' again with this module included.
-  count = 1
+  count = 0
   source = "../../modules/eks-cluster/modules/karpenter-post-deploy"
   karpenter_node_role_name = module.nginx-eks-karpenter-deploy.karpenter_node_role_name
 
