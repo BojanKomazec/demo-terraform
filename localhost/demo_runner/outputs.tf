@@ -21,3 +21,7 @@ output "person_name" {
 output "person_name_2" {
 	value = local.person_name_2
 }
+
+output "expressions_demo_full_name" {
+	value = module.expressions_demo.0.full_name
+}

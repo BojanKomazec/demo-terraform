@@ -31,3 +31,10 @@ module "meta_args_demo" {
 	# tmp_dir_path = "${path.cwd}"
 	dest_dir_path = "${path.module}/tmp/"
 }
+
+module "expressions_demo" {
+  count = 1
+  source = "./modules/expressions_demo"
+  name = var.name
+  surname = var.surname
+}
