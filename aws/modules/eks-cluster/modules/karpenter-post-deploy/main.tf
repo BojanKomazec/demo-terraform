@@ -11,7 +11,7 @@ resource "kubernetes_manifest" "karpenter_nodepool" {
     instance_os =  yamlencode(var.node_pool_instance.os),
     instance_family =  yamlencode(var.node_pool_instance.family),
     instance_size =  yamlencode(var.node_pool_instance.size),
-    node_group_name = var.node_group_name,
+    node_group_names = yamlencode(var.node_group_names),
   }))
 
   depends_on = [

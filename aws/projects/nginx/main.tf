@@ -165,7 +165,7 @@ module "nginx-eks-karpenter-post-deploy" {
     size   = ["medium"]
   }
 
-  node_group_name                  = local.node_group_name
+  node_group_names                  = [local.node_group_name]
   cluster_name                     = local.cluster_name
 }
 

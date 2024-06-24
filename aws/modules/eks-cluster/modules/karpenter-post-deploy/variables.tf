@@ -11,8 +11,8 @@ variable "node_pool_instance" {
   })
 }
 
-variable "node_group_name" {
-  type = string
+variable "node_group_names" {
+  type = list(string)
 }
 
 variable "cluster_name" {
