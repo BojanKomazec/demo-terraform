@@ -20,7 +20,7 @@ and set it from the command line:
 $ docker compose run --rm terraform plan -var nginx_docker_container_id=$(docker inspect --format='{{ .ID }}' nginx) -generate-config-out=generated.tf
 ```
 
-The command above outputs:
+The command above generates file `generated.tf` and outputs:
 ```
   # Warning: this will destroy the imported resource
 -/+ resource "docker_container" "nginx" {
@@ -33,6 +33,8 @@ The command above outputs:
     ...
 Plan: 1 to import, 1 to add, 0 to change, 1 to destroy.
 ```
+Note that if we run Terraform as Docker container, all terraform-generated directories and files (including `generated.tf`) will have `root` as owner and group.
+
 We'll preserve only those attributes that are required in resource "docker_container".
 
 If we run the same command again, we'll get:
@@ -43,7 +45,7 @@ Error: Target generated file already exists
 So, let's omit -generate-config argument:
 
 ```
-$ docker compose run --rm terraform plan -var nginx_docker_container_id=$(docker inspect --format='{{ .ID }}' nginx) 
+$ docker compose run --rm terraform plan -var nginx_docker_container_id=$(docker inspect --format='{{ .ID }}' nginx)
 ```
 
 This command now outputs:
