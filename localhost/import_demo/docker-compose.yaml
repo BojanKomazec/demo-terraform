@@ -1,0 +1,35 @@
+---
+name: terraform
+
+services:
+  terraform:
+    image:  hashicorp/terraform:latest
+    volumes:
+      - .:/workspace
+      #
+      # The following bind mount is required only if Terraform provider requires
+      # access to the Docker daemon on the host machine and that's the case with
+      # provider "docker" as it needs to execute 'docker inspect' on the host as
+      # that's where we're running the nginx docker container.
+      #
+      # bind mount Docker socket from the host onto the container so docker
+      # provider can access host's Docker daemon (via its Unix socket
+      # /var/run/docker.sock).
+      #
+      # Without this, terraform plan fails with error:
+      #   Error pinging Docker server: Cannot connect to the Docker daemon at
+      #   unix:///var/run/docker.sock. Is the docker daemon running?
+      - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: /workspace
+    # entrypoint: ["ping", "8.8.8.8"]
+    #
+    # wget: bad address 'registry.terraform.io'
+    # entrypoint: ["wget", "https://registry.terraform.io/.well-known/terraform.json"]
+    #
+    # ping: bad address 'registry.terraform.io'
+    # entrypoint: ["ping", "registry.terraform.io"]
+    #
+    # ;; connection timed out; no servers could be reached
+    # entrypoint: ["nslookup", "registry.terraform.io"]
+    #
+    # entrypoint: ["cat", "/etc/resolv.conf"]
