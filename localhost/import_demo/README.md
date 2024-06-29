@@ -1,6 +1,6 @@
 This project demonstrates how to bring the existing infrastructure under Terraform management. It is inspired by https://developer.hashicorp.com/terraform/tutorials/state/state-import.
 
-Provided `docker-compose.yaml` supports using Terraform Docker container on the development host (for those who prefer it over installing Terraform locally).
+Provided `docker-compose.yaml` supports using Terraform Docker container (https://hub.docker.com/r/hashicorp/terraform) on the development host (for those who prefer it over installing Terraform locally).
 
 To use this demo project please follow these steps:
 
@@ -35,7 +35,7 @@ Plan: 1 to import, 1 to add, 0 to change, 1 to destroy.
 ```
 Note that if we run Terraform as Docker container, all terraform-generated directories and files (including `generated.tf`) will have `root` as owner and group.
 
-We'll preserve only those attributes that are required in resource "docker_container".
+We don't want to destroy the resource. We need to adjust the generated configuration so the `terraform plan` shows that there are no differences between the configurarion and the actual resource. We don't need to have all resource's attributes in the configuration so we'll preserve only those attributes that are required in resource "docker_container" and will remove those that have default values.
 
 If we run the same command again, we'll get:
 
@@ -92,7 +92,7 @@ Terraform will perform the following actions:
 
 Plan: 1 to import, 0 to add, 1 to change, 0 to destroy.
 ```
-We can now use apply:
+We can now use `apply`:
 ```
 $ docker compose run --rm terraform apply -var nginx_docker_container_id=$(docker inspect --format='{{ .ID }}' nginx) -auto-approve
 ...
