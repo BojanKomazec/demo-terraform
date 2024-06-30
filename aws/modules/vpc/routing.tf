@@ -23,11 +23,13 @@ resource "aws_route_table" "public" {
 }
 
 resource "aws_route_table" "private" {
+  count = local.is_nat_required ? 1 : 0
+
   vpc_id = aws_vpc.this.id
 
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.public.id
+    nat_gateway_id = aws_nat_gateway.public[0].id
   }
 
   tags = {
@@ -36,14 +38,23 @@ resource "aws_route_table" "private" {
 }
 
 resource "aws_route_table_association" "public" {
-  for_each       = { for idx, subnet in resource.aws_subnet.this : idx => subnet.id if resource.aws_subnet.this[idx].map_public_ip_on_launch == true}
+  for_each       = {
+    for idx, subnet in resource.aws_subnet.this : idx => subnet.id
+    if resource.aws_subnet.this[idx].map_public_ip_on_launch == true
+  }
+
   subnet_id      = each.value
   route_table_id = aws_route_table.public.id
 }
 
 resource "aws_route_table_association" "private" {
-  for_each       = { for idx, subnet in resource.aws_subnet.this : idx => subnet.id if resource.aws_subnet.this[idx].map_public_ip_on_launch == false}
+  for_each       = {
+    for idx, subnet in resource.aws_subnet.this : idx => subnet.id
+    if resource.aws_subnet.this[idx].map_public_ip_on_launch == false &&
+      local.is_nat_required
+  }
+
   subnet_id      = each.value
-  route_table_id = aws_route_table.private.id
+  route_table_id = aws_route_table.private[0].id
 }
 

@@ -7,6 +7,7 @@
 
 # Elastic IP
 resource "aws_eip" "public_nat" {
+  count = local.is_nat_required ? 1 : 0
 
   # Indicates if this EIP is for use in VPC
   domain = "vpc"
@@ -16,7 +17,13 @@ resource "aws_eip" "public_nat" {
 }
 
 resource "aws_nat_gateway" "public" {
-  allocation_id = aws_eip.public_nat.id
+  count = local.is_nat_required ? 1 : 0
+
+  # Need to use index here as otherwise the following error occurs:
+  # Error: Missing resource instance key
+  # Because aws_eip.public_nat has "count" set, its attributes must be accessed
+  # on specific instances.
+  allocation_id = aws_eip.public_nat[0].id
 
   # arbitrary selected public subnet
   # aws_subnet.public-eu-west-2a.id

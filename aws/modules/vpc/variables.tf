@@ -34,6 +34,9 @@ variable "igw" {
   })
 }
 
+# Optional.
+# NAT is required only if resources in private networks need outbound access to
+# the Internet.
 variable "nat_gw" {
   description = "NAT properties"
   type = object({
@@ -42,5 +45,6 @@ variable "nat_gw" {
       Name = string
     })
   })
+  default = null
 }
 

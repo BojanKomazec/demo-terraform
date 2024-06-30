@@ -1,5 +1,5 @@
 output "subnet_ids" {
-    // │ This object does not have an attribute named "id".
+  // │ This object does not have an attribute named "id".
   // value = resource.aws_subnet.this[*].id
   value = [ for index, subnet in resource.aws_subnet.this : subnet.id ]
 }
