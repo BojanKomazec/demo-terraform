@@ -143,7 +143,7 @@ module "nginx-eks-karpenter-deploy" {
   cluster_name                     = local.cluster_name
   karpenter_version                = "0.37.0"
   karpenter_namespace              = "kube-system"
-  node_group_name                  = local.node_group_name
+  node_group_names                 = [local.node_group_name]
   node_groups_subnet_ids           = module.nginx-vpc.private_subnet_ids
   eks_cluster_node_group_role_name = module.nginx-eks-cluster.node_group_role_name
 
@@ -154,8 +154,8 @@ module "nginx-eks-karpenter-post-deploy" {
   # Provisioning Karpenter for the first time is a two-step process.
   # For the first 'terraform apply', omit provisioning this module.
   # Then execute 'terraform apply' again with this module included.
-  count = 0
-  source = "../../modules/eks-cluster/modules/karpenter-post-deploy"
+  count                    = 0
+  source                   = "../../modules/eks-cluster/modules/karpenter-post-deploy"
   karpenter_node_role_name = module.nginx-eks-karpenter-deploy.karpenter_node_role_name
 
   node_pool_instance = {
@@ -165,8 +165,8 @@ module "nginx-eks-karpenter-post-deploy" {
     size   = ["medium"]
   }
 
-  node_group_names                  = [local.node_group_name]
-  cluster_name                     = local.cluster_name
+  node_group_names = [local.node_group_name]
+  cluster_name     = local.cluster_name
 }
 
 # output "karpenter_node_pool_yaml_content" {
