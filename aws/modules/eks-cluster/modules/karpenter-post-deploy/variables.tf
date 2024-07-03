@@ -1,5 +1,5 @@
 variable "karpenter_node_role_name" {
-	type = string
+  type = string
 }
 
 variable "node_pool_instance" {

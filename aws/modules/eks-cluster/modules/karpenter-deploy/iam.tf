@@ -86,7 +86,7 @@ resource "aws_iam_instance_profile" "karpenter" {
 # do not have permission to create the service-linked role for EC2 Spot
 # Instances
 # See: https://karpenter.sh/docs/troubleshooting/#missing-service-linked-role
-resource "aws_iam_service_linked_role" "elasticbeanstalk" {
+resource "aws_iam_service_linked_role" "spot-ec2" {
   aws_service_name = "spot.amazonaws.com"
   tags = {
     Origin = "karpenter-deploy"

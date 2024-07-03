@@ -34,8 +34,8 @@ variable "node_groups_subnet_ids" {
 #   type        = string
 # }
 
-variable "node_group_name" {
-  type = string
+variable "node_group_names" {
+  type = list(string)
 }
 
 # aws_iam_role.node_group_role.name
@@ -62,6 +62,6 @@ variable "karpenter_version" {
 
 variable "karpenter_namespace" {
   description = "EKS cluster namespace into which to install Karpenter"
-  type = string
+  type        = string
 }
 

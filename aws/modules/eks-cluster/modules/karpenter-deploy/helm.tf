@@ -51,7 +51,7 @@ resource "helm_release" "karpenter" {
             - key: eks.amazonaws.com/nodegroup
               operator: In
               values:
-              - ${var.node_group_name}
+              ${yamlencode(var.node_group_names)}
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           - topologyKey: "kubernetes.io/hostname"
@@ -59,7 +59,12 @@ resource "helm_release" "karpenter" {
   ]
 
   # depends_on = [ resource.kubernetes_manifest.karpenter_crd ]
-  depends_on = [ resource.helm_release.karpenter_crd ]
+  depends_on = [resource.helm_release.karpenter_crd]
+}
+
+resource "local_file" "foo" {
+  content  = helm_release.karpenter.manifest
+  filename = "${path.module}/output/helm_release_karpenter_manifest.yaml"
 }
 
 # https://gallery.ecr.aws/karpenter/karpenter-crd

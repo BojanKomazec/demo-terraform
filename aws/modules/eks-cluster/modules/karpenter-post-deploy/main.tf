@@ -6,18 +6,18 @@ resource "kubernetes_manifest" "karpenter_nodepool" {
   # count = 0
   # manifest = yamldecode(file("${path.module}/files/templates/karpenter-node-pool.yaml.tftpl"))
   manifest = yamldecode(templatefile("${path.module}/files/templates/karpenter-node-pool.yaml.tftpl", {
-  # manifest = templatefile("${path.module}/files/templates/karpenter-node-pool.yaml.tftpl", {
-    instance_arch = yamlencode(var.node_pool_instance.arch),
-    instance_os =  yamlencode(var.node_pool_instance.os),
-    instance_family =  yamlencode(var.node_pool_instance.family),
-    instance_size =  yamlencode(var.node_pool_instance.size),
+    # manifest = templatefile("${path.module}/files/templates/karpenter-node-pool.yaml.tftpl", {
+    instance_arch    = yamlencode(var.node_pool_instance.arch),
+    instance_os      = yamlencode(var.node_pool_instance.os),
+    instance_family  = yamlencode(var.node_pool_instance.family),
+    instance_size    = yamlencode(var.node_pool_instance.size),
     node_group_names = yamlencode(var.node_group_names),
   }))
 
   depends_on = [
     # because nodeClassRef has EC2NodeClass as its kind
-		resource.kubernetes_manifest.karpenter_ec2_nodeclass
-		# module.karpenter-core
+    resource.kubernetes_manifest.karpenter_ec2_nodeclass
+    # module.karpenter-core
     # resource.helm_release.karpenter,
     # resource.kubernetes_manifest.karpenter_crd
   ]
@@ -49,10 +49,10 @@ resource "kubernetes_manifest" "karpenter_ec2_nodeclass" {
   #count = 0
   manifest = yamldecode(templatefile("${path.module}/files/templates/karpenter-EC2NodeClass.yaml.tftpl", {
     karpenter_node_role_name = var.karpenter_node_role_name,
-    cluster_name = var.cluster_name
+    cluster_name             = var.cluster_name
   }))
   # depends_on = [
-	# 	# resource.kubernetes_manifest.karpenter_nodepool
-	# 	module.karpenter-core
-	# ]
+  # 	# resource.kubernetes_manifest.karpenter_nodepool
+  # 	module.karpenter-core
+  # ]
 }

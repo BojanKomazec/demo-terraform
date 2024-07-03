@@ -17,10 +17,13 @@
 # │
 # │ Another client is managing a field Terraform tried to update. Set "force" to true to override: Apply failed with 1 conflict: conflict with "vpcLambda" using v1:
 # │ .data.mapRoles
+#
+# There should only be one aws-auth ConfigMap in the cluster, specifically
+# located in the kube-system namespace.
 resource "kubernetes_config_map_v1_data" "config_map_aws_auth" {
   metadata {
     name      = "aws-auth"
-    namespace = var.karpenter_namespace
+    namespace = "kube-system"
   }
 
   # Force overwriting data that is managed outside of Terraform.

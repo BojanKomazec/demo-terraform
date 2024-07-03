@@ -14,3 +14,6 @@ output "kubeconfig-certificate-authority-data" {
   value = aws_eks_cluster.this.certificate_authority[0].data
 }
 
+# output "node_group_names" {
+#   value = [for ng in aaws_eks_node_group.workers : ng.node_group_name]
+# }

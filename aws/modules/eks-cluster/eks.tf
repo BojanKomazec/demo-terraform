@@ -43,7 +43,7 @@ resource "aws_eks_cluster" "this" {
     # AWS CloudFormation, the default is CONFIG_MAP. If you create the cluster
     # by using the AWS Management Console, the default value is
     # API_AND_CONFIG_MAP
-    authentication_mode                         = "API_AND_CONFIG_MAP"
+    authentication_mode = "API_AND_CONFIG_MAP"
 
     # (Optional) Whether or not to bootstrap the access config values to the
     # cluster. Default is true.
@@ -70,6 +70,7 @@ resource "aws_eks_cluster" "this" {
   #   ]
 }
 
+# TODO: Introduce support for multiple node groups
 resource "aws_eks_node_group" "workers" {
   # (Optional) Name of the EKS Node Group.
   node_group_name = var.node_group["name"]
