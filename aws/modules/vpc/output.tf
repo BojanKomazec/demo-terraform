@@ -25,3 +25,7 @@ output "public_subnet_ids" {
 output "region" {
     value = data.aws_region.current.name
 }
+
+output "vpc_id" {
+  value = resource.aws_vpc.this.id
+}
