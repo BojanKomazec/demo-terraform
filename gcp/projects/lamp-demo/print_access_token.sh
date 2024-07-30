@@ -1,0 +1,1 @@
+docker run --rm --volumes-from gcloud-config gcr.io/google.com/cloudsdktool/google-cloud-cli gcloud auth print-access-token
