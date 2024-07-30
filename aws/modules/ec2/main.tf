@@ -8,6 +8,11 @@ data "aws_ami" "this" {
   }
 
   filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
     name   = "root-device-type"
     values = var.ami.root_device_types
   }
@@ -18,28 +23,6 @@ data "aws_ami" "this" {
   }
 
   owners = var.ami.owners
-}
-
-resource "aws_security_group" "this" {
-  name = "ec2-${var.ec2.tags.Name}-${var.environment}-sg"
-
-  vpc_id = var.vpc_id
-
-  ingress {
-    cidr_blocks = [
-      "0.0.0.0/0"
-    ]
-    from_port = 22
-    to_port   = 22
-    protocol  = "tcp"
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = -1
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 }
 
 resource "aws_instance" "this" {

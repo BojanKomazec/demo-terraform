@@ -7,7 +7,7 @@ variable "key_pair_name" {
 # If this variable is defined, this module will not create key pair but will be
 # using the provided public key.
 variable "public_key_path" {
-  description = "Path to the public key from the key pair generated outside Terraform"
+  description = "Absolute to the public key from the key pair generated outside Terraform"
   type        = string
   default     = null
 }
@@ -32,7 +32,7 @@ variable "vpc_id" {
 variable "ec2" {
   description = "Specification of the EC2 instance"
   type = object({
-    # e.g. "t4g.nano"
+    # e.g. "t4g.nano", "t2.micro"
     instance_type = string
     subnet_id     = string
     tags = object({
@@ -54,9 +54,34 @@ variable "ami" {
   description = "Specification of the AMI to be used when creating EC2"
   type = object({
     # ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+		# "al2023-ami-2023.*-x86_64"
     name_pattern        = list(string)
+		architecture				= string # "x86_64"
     root_device_types   = optional(list(string), ["ebs"])
     virtualization_type = optional(list(string), ["hvm"])
     owners              = optional(list(string), ["aws"])
   })
+}
+
+variable "security_group_ingress_rules" {
+	description = "Ingress rules of the security group associated with EC2 instance"
+
+	# We're using map here - it's ok to pass to client the responsibility of
+	# creating data structure that for_each can iterate over.
+	type = map(object({
+		cidr_ipv4   = string #"10.0.0.0/8"
+		from_port   = number # 80
+		ip_protocol = string # "tcp"
+		to_port     = number # 80
+	}))
+}
+
+variable "security_group_egress_rules" {
+	description = "Egress rules of the security group associated with EC2 instance"
+	type = map(object({
+		cidr_ipv4   = string #"10.0.0.0/8"
+		from_port   = number # 80
+		ip_protocol = string # "tcp"
+		to_port     = number # 80
+	}))
 }
